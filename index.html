@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>理由カード 試作 ラティ</title>
+<style>
+*{box-sizing:border-box}
+html{background:#5a7edc}
+body{margin:0;min-height:100vh;background:linear-gradient(#3a6ea5,#6f9bd1 60%,#8fb676);color:#000;font-family:Tahoma,"MS UI Gothic","Meiryo UI","Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif;font-size:14px;line-height:1.5;padding:22px 12px 40px}
+.win{max-width:1120px;margin:0 auto;background:#ece9d8;border:3px solid #0831d9;border-top:0;border-radius:9px 9px 3px 3px;box-shadow:4px 6px 14px rgba(0,0,0,.45)}
+.titlebar{display:flex;align-items:center;justify-content:space-between;height:32px;padding:0 5px 0 10px;border-radius:7px 7px 0 0;background:linear-gradient(#0997ff 0%,#0053ee 8%,#0050ee 40%,#06f 88%,#06f 93%,#005bff 95%,#003dd7 96%,#003dd7 100%);color:#fff;font-weight:700;font-size:15px;text-shadow:1px 1px 0 #0f1089}
+.wb{display:flex;gap:2px}
+.wb i{display:block;width:23px;height:23px;line-height:20px;text-align:center;font-style:normal;font-size:14px;border:1px solid #fff;border-radius:3px;background:linear-gradient(135deg,#6da1ff,#2e63e8);text-shadow:none}
+.wb i.x{background:linear-gradient(135deg,#e9967a,#c8401c)}
+.wrap{padding:12px 14px 14px}
+.tabs{display:flex;gap:2px;padding-left:6px;margin:0;position:relative;z-index:1}
+.tab{border:1px solid #919b9c;border-bottom:0;border-radius:3px 3px 0 0;background:linear-gradient(#fff,#ecebe5);padding:5px 16px 4px;margin-top:3px;font:inherit;font-size:14px;cursor:pointer;color:#000}
+.tab:hover{box-shadow:inset 0 2px 0 #fbb538}
+.tab[aria-selected=true]{background:#fcfcfe;margin-top:0;padding-top:8px;margin-bottom:-1px;box-shadow:inset 0 3px 0 #ffc83c;font-weight:700}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:12px;align-items:start;background:#fcfcfe;border:1px solid #919b9c;padding:12px}
+.grid>div{display:grid;gap:12px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.box{background:#d6dff7;border:1px solid #fff;border-radius:6px 6px 0 0;box-shadow:0 0 0 1px #9aa9d4;padding:0 0 12px}
+.box h2{margin:0 0 10px;padding:5px 12px;font-size:14px;font-weight:700;color:#215dc6;background:linear-gradient(90deg,#fff,#c6d3f7);border-radius:5px 5px 0 0}
+.box>*:not(h2){margin-left:12px;margin-right:12px}
+.c-white{background:#fff}
+.box>input,.box>select{width:calc(100% - 24px)}
+.note{font-size:13px;color:#333}
+label{display:block;font-size:13px;margin:8px 0 2px}
+input,select{width:100%;font:inherit;padding:3px 5px;border:1px solid #7f9db9;background:#fff;color:#000;border-radius:0;box-shadow:inset 1px 1px 2px rgba(0,0,0,.12)}
+input:focus,select:focus{outline:1px solid #316ac5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;color:#000;cursor:pointer}
+button.go,button.sub{margin-top:12px;padding:4px 18px;min-width:96px;border:1px solid #003c74;border-radius:3px;background:linear-gradient(#fff,#ece9d8 85%,#d6d0c5);box-shadow:inset 0 0 0 1px #fff}
+button.go{font-weight:700;box-shadow:inset 0 0 0 2px #7aa5f4,inset 0 0 0 3px #fff}
+button.go:hover,button.sub:hover{box-shadow:inset 0 0 0 2px #fbb538}
+button.go:active,button.sub:active{background:linear-gradient(#d6d0c5,#ece9d8);box-shadow:inset 1px 1px 2px rgba(0,0,0,.35)}
+.card{border:1px solid #7f9db9;background:#fff}
+.card .h{background:linear-gradient(#3a7ad9,#215dc6);color:#fff;padding:4px 10px;font-weight:700}
+.card .r{display:grid;grid-template-columns:96px 1fr 56px;gap:8px;align-items:center;padding:5px 10px;border-top:1px solid #d4d0c8;font-size:14px}
+.card .r:first-of-type{border-top:0}
+.card .k{color:#555;font-size:13px}
+.tag{display:block;text-align:center;color:#fff;font-size:12px;font-weight:700;padding:1px 0;border:1px solid rgba(0,0,0,.35);border-radius:2px}
+.tag.a{background:linear-gradient(#5aa0e8,#2f6fc0)}.tag.p{background:linear-gradient(#ff9a40,#d2650a)}.tag.s{background:linear-gradient(#69b84a,#3a8a22)}.tag.f{background:linear-gradient(#a78a62,#7a5f3a)}
+.result{font-weight:700;color:#c00}
+.mono{font-family:"Courier New",Consolas,monospace;font-size:12px;word-break:break-all;color:#444}
+.verdict{margin-top:10px;padding:8px 10px 8px 34px;position:relative;font-weight:700;background:#e9f6d6;border:1px solid #6aa84f}
+.verdict::before{content:"✔";position:absolute;left:10px;top:8px;color:#2b8a12;font-size:18px;line-height:1}
+.verdict.bad{background:#fde2e2;border-color:#cc3333}
+.verdict.bad::before{content:"✖";color:#c00}
+.bar{position:relative;height:20px;background:#fff;border:1px solid #7f9db9;margin:8px 0 2px;box-shadow:inset 1px 1px 2px rgba(0,0,0,.15)}
+.bar .seg{position:absolute;top:2px;bottom:2px;left:2px;background:repeating-linear-gradient(90deg,#3fb33a 0 8px,#fff 8px 10px)}
+.bar .dot{position:absolute;top:2px;width:12px;height:14px;background:linear-gradient(#ff9a40,#d2650a);border:1px solid #7a3a00;transform:translateX(-6px)}
+.scale{display:flex;justify-content:space-between;font-size:12px;color:#444}
+pre.rule{margin:0 12px;white-space:pre-wrap;font-size:13px;font-family:"Courier New","MS Gothic","Hiragino Kaku Gothic ProN",monospace;background:#fff;border:1px solid #7f9db9;padding:8px 10px;line-height:1.7;box-shadow:inset 1px 1px 2px rgba(0,0,0,.12)}
+.status{display:flex;gap:2px;padding:3px 6px;background:#ece9d8;border-top:1px solid #aca899;font-size:12px}
+.status span{padding:2px 10px;border:1px solid;border-color:#aca899 #fff #fff #aca899}
+.status span:last-child{flex:1}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="win"><div class="titlebar"><span>理由カード - ラティ</span></div>
+<div class="wrap">
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t1" aria-selected="true">教室 英語の音読</button>
+  <button class="tab" role="tab" id="t2" aria-selected="false">校外 自然学習(水質)</button>
+</div>
+
+<!-- ===== 音読 ===== -->
+<section id="p1" class="grid">
+  <div>
+    <div class="box c-cobalt">
+      <h2>1 規則(先生Bが署名した版)</h2>
+      <pre class="rule" id="rule1"></pre>
+      <div class="note" style="margin-top:6px">規則の版(中身のハッシュ): <span class="mono" id="hash1"></span></div>
+    </div>
+    <div class="box c-dark">
+      <h2>2 先生が入れる</h2>
+      <div class="row2">
+        <div><label for="a_rec">録音</label><select id="a_rec"><option value="1">あり</option><option value="0">なし</option></select></div>
+        <div><label for="a_words">1分間の語数</label><input id="a_words" type="number" min="0" value="62"></div>
+      </div>
+      <div class="row2">
+        <div><label for="a_miss">誤読の数(先生が数える)</label><input id="a_miss" type="number" min="0" value="6"></div>
+      </div>
+      <label for="a_note">一言コメント(迷ったこと、気づいたこと)</label><input id="a_note" value="録音の途中で声が小さくなり、聞き取れなかった箇所がある">
+      <div class="row2"><div><label for="a_ok">承認した先生</label><select id="a_ok"><option>先生B</option><option selected>先生C</option></select></div>
+        <div><label for="a_code">その先生の教員コード(先生本人と教育委員会が知る)</label><input id="a_code" value="cccc"></div></div>
+      <button class="go" id="make1">理由カードを作る</button>
+    </div>
+  </div>
+  <div>
+    <div class="box c-white"><h2>3 理由カード</h2><div id="card1" class="note">左で「理由カードを作る」を押す</div></div>
+    <div class="box c-teal">
+      <h2>4 家庭の検算(紙で打つ想定)</h2>
+      <div class="note">カードに書かれた数を、家庭が別に打ち直す。同じ規則で、同じ判断になるか。</div>
+      <div class="row2">
+        <div><label for="h_words">語数</label><input id="h_words" type="number" min="0" value="62"></div>
+        <div><label for="h_miss">誤読の数</label><input id="h_miss" type="number" min="0" value="6"></div>
+      </div>
+      <button class="sub" id="check1">検算する</button>
+      <div id="verify1"></div>
+    </div>
+    <div class="box c-mauve">
+      <h2>5 署名の確認(教育委員会、または署名した先生本人)</h2>
+      <div class="note">教員コードを知っているのは、先生本人と教育委員会だけ。コードを打ち込み、カードの内容とまぜてハッシュにして、カードの署名と比べる。別のコードを打つと、一致しなくなる。</div>
+      <div><label for="v_code">教員コード(先生本人と教育委員会が知る)</label><input id="v_code" value="cccc"></div>
+      <button class="sub" id="vsig">署名を確認する</button>
+      <div id="v_out"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 自然学習 ===== -->
+<section id="p2" class="grid" hidden>
+  <div>
+    <div class="box c-cobalt">
+      <h2>1 規則(先生が署名した版)</h2>
+      <pre class="rule" id="rule2"></pre>
+      <div class="note" style="margin-top:6px">規則の版: <span class="mono" id="hash2"></span></div>
+    </div>
+    <div class="box c-dark">
+      <h2>2 子どもと先生が入れる</h2>
+      <div class="row2">
+        <div><label for="n_up">上流の透明度(cm)</label><input id="n_up" type="number" min="0" value="48"></div>
+        <div><label for="n_down">下流の透明度(cm)</label><input id="n_down" type="number" min="0" value="31"></div>
+      </div>
+      <div class="row2">
+        <div><label for="n_times">測定の回数</label><input id="n_times" type="number" min="0" value="3"></div>
+        <div><label for="n_claim">子どもが選んだ主張の型</label>
+          <select id="n_claim"><option value="up">上流ほど透明度が高い</option><option value="more">生き物が増えた</option></select></div>
+      </div>
+      <label for="n_note">先生の見方(任意)</label><input id="n_note" value="考察は具体的。雨の翌日の影響に触れていた">
+      <label for="n_ok">承認した先生</label><input id="n_ok" value="先生C">
+      <button class="go" id="make2">理由カードを作る</button>
+    </div>
+  </div>
+  <div>
+    <div class="box c-white"><h2>3 理由カード</h2><div id="card2" class="note">左で「理由カードを作る」を押す</div></div>
+  </div>
+</section>
+</div>
+<div class="status"><span>準備完了</span><span>規則・児童・数値は架空の例</span></div>
+</div>
+
+<script>
+/* ---------- 規則(架空) ---------- */
+const RULE1 = {id:'音読1分', ver:'v3', minWords:60, passMiss:4,
+  text:'規則 音読1分 v3\n1 録音がない → 人に戻す\n2 語数が60未満 → 人に戻す\n3 誤読が4以下 → 次の段階\n4 誤読が5以上 → 今の段階(あと「誤読−4」つ減ると次の段階)'};
+const RULE2 = {id:'自然学習 水質', ver:'v1',
+  text:'規則 水質の観察 v1\n1 測定が3回未満 → 人に戻す\n2 主張「上流ほど透明度が高い」→ 上流の値 > 下流の値 なら 合う\n3 主張「生き物が増えた」→ 比べる記録がない → 人に戻す'};
+
+function judge1(i){
+  const path=[];
+  if(!i.rec){path.push('録音なし');return {res:'人に戻す',why:'録音がないため判定しない',path,need:null};}
+  path.push('録音あり');
+  if(i.words<RULE1.minWords){path.push('語数 '+i.words+' < '+RULE1.minWords);return {res:'人に戻す',why:'語数が少なく判定しない',path,need:null};}
+  path.push('語数 '+i.words+' ≥ '+RULE1.minWords);
+  if(i.miss<=RULE1.passMiss){path.push('誤読 '+i.miss+' ≤ '+RULE1.passMiss);return {res:'次の段階',why:'基準以内',path,need:0};}
+  path.push('誤読 '+i.miss+' > '+RULE1.passMiss);
+  return {res:'今の段階',why:'あと誤読を '+(i.miss-RULE1.passMiss)+' 減らすと次の段階',path,need:i.miss-RULE1.passMiss};
+}
+function judge2(i){
+  const path=[];
+  if(i.times<3){path.push('測定 '+i.times+'回 < 3');return {res:'人に戻す',why:'測定が足りない',path};}
+  path.push('測定 '+i.times+'回 ≥ 3');
+  if(i.claim==='more'){path.push('主張「生き物が増えた」');path.push('比べる記録なし');return {res:'人に戻す',why:'この主張は、入っている記録で照合できない',path};}
+  path.push('主張「上流ほど透明度が高い」');
+  if(i.up>i.down){path.push('上流 '+i.up+' > 下流 '+i.down);return {res:'合う',why:'値と主張に食い違いがない',path};}
+  path.push('上流 '+i.up+' ≤ 下流 '+i.down);return {res:'合わない',why:'値と主張が食い違う。先生と確かめる',path};
+}
+
+/* ---------- 署名(簡易: 署名コード + 規則の版 + 内容 をまぜたハッシュ) ---------- */
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+const enc=s=>new TextEncoder().encode(s);
+async function sha(s){return hex(await crypto.subtle.digest('SHA-256',enc(s)));}
+async function sign(code,hash,body){return (await sha(code+'|'+hash+'|'+body)).slice(0,12);}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+
+function row(k,v,t,cls){return '<div class="r"><span class="k">'+k+'</span><span>'+v+'</span><span class="tag '+cls+'">'+t+'</span></div>';}
+
+/* ---------- 音読 ---------- */
+let last1=null;
+async function make1(){
+  const i={rec:$('a_rec').value==='1',words:+$('a_words').value,miss:+$('a_miss').value};
+  const j=judge1(i);
+  const hash=await sha(RULE1.text);
+  const body=JSON.stringify({rule:RULE1.id+RULE1.ver,i,j:j.res});
+  const code=$('a_code').value;
+  const sig=await sign(code,hash,body);
+  last1={i,j,hash,body,sig,who:$('a_ok').value};
+  let h='<div class="card"><div class="h">児童A(架空) / 英語 / 音読1分</div>';
+  h+=row('入れた数','録音'+(i.rec?'あり':'なし')+'、語数 '+i.words+'、誤読 '+i.miss,'人','h'.replace('h','f'));
+  h+=row('規則と結果','規則'+RULE1.ver+'(先生B署名)。<b class="result">'+esc(j.res)+'</b>。'+esc(j.why),'自動','a');
+  h+=row('通った道',esc(j.path.join(' → ')),'自動','a');
+  h+=row('一言コメント',esc($('a_note').value||'(なし)'),'先生','p');
+  h+=row('承認',esc($('a_ok').value)+'  署名 <span class="mono">'+sig+'</span>','署名','s');
+  h+='</div>';
+  h+='<div class="note" style="margin-top:8px">規則の版(ハッシュ) <span class="mono">'+hash.slice(0,16)+'…</span></div>';
+  if(j.need>0){
+    const max=Math.max(i.miss,8)+2,pos=v=>(v/max*100)+'%';
+    h+='<div class="note" style="margin-top:10px"><b>最小の変更(方眼の代わり)</b> 誤読の位置と、次の段階との境目</div>'
+      +'<div class="bar"><div class="seg" style="left:0;width:'+pos(RULE1.passMiss)+'"></div><div class="dot" style="left:'+pos(i.miss)+'"></div></div>'
+      +'<div class="scale"><span>0</span><span>境目 '+RULE1.passMiss+'</span><span>'+max+'</span></div>';
+  }
+  $('card1').className='';$('card1').innerHTML=h;
+  $('h_words').value=i.words;$('h_miss').value=i.miss;$('verify1').innerHTML='';$('v_out').innerHTML='';
+}
+async function check1(){
+  if(!last1){$('verify1').innerHTML='<div class="verdict bad">先にカードを作る</div>';return;}
+  const j=judge1({rec:last1.i.rec,words:+$('h_words').value,miss:+$('h_miss').value});
+  const same=j.res===last1.j.res;
+  $('verify1').innerHTML='<div class="verdict'+(same?'':' bad')+'">家庭の結果: '+esc(j.res)+'。カードの結果: '+esc(last1.j.res)+'。'+(same?'同じ判断になった。':'食い違う。数の入れ間違いか、規則の違いを確かめる。')+'</div>';
+}
+
+/* ---------- 自然学習 ---------- */
+async function make2(){
+  const i={up:+$('n_up').value,down:+$('n_down').value,times:+$('n_times').value,claim:$('n_claim').value};
+  const j=judge2(i);
+  const hash=await sha(RULE2.text);
+  const sig=await sign('cccc',hash,JSON.stringify({rule:RULE2.id+RULE2.ver,i,j:j.res}));
+  const bad=(j.res==='人に戻す'||j.res==='合わない');
+  let h='<div class="card"><div class="h">児童A(架空) / 探究 / 川の水質調査</div>';
+  h+=row('入れた数','上流 '+i.up+'cm、下流 '+i.down+'cm、'+i.times+'回','人','f');
+  h+=row('主張の型',i.claim==='up'?'上流ほど透明度が高い':'生き物が増えた','選ぶ','p');
+  h+=row('規則と結果','規則'+RULE2.ver+'。<b class="result">'+esc(j.res)+'</b>。'+esc(j.why),'自動','a');
+  h+=row('通った道',esc(j.path.join(' → ')),'自動','a');
+  h+=row('先生の見方',esc($('n_note').value||'(なし)'),'任意','f');
+  h+=row('承認',esc($('n_ok').value)+'  署名 <span class="mono">'+sig+'</span>','署名','s');
+  h+='</div>';
+  h+='<div class="note" style="margin-top:8px">規則の版(ハッシュ) <span class="mono">'+hash.slice(0,16)+'…</span></div>';
+  h+='<div class="note" style="margin-top:8px">照合できるのは、値と主張が合うかまで。測り間違いや、作った値は見抜けない。考察の深さは、先生が読む。</div>';
+  $('card2').className='';$('card2').innerHTML=h;
+}
+
+/* ---------- 画面 ---------- */
+$('rule1').textContent=RULE1.text;$('rule2').textContent=RULE2.text;
+sha(RULE1.text).then(h=>$('hash1').textContent=h.slice(0,32)+'…').catch(()=>$('hash1').textContent='(計算できない)');
+sha(RULE2.text).then(h=>$('hash2').textContent=h.slice(0,32)+'…').catch(()=>$('hash2').textContent='(計算できない)');
+async function vsig(){
+  if(!last1){$('v_out').innerHTML='<div class="verdict bad">先にカードを作る</div>';return;}
+  const i=last1.i;
+  const j=judge1(i);
+  const body=JSON.stringify({rule:RULE1.id+RULE1.ver,i,j:j.res});
+  const sig=await sign($('v_code').value,last1.hash,body);
+  const ok=sig===last1.sig;
+  $('v_out').innerHTML='<div class="verdict'+(ok?'':' bad')+'">作り直した署名 <span class="mono">'+sig+'</span> / カードの署名 <span class="mono">'+last1.sig+'</span><br>'+(ok?'一致した。'+esc(last1.who)+'の教員コードで、この規則と内容に署名したと確かめられた。':'一致しない。内容が書き換えられたか、教員コードが違う。')+'</div>';
+}
+$('vsig').onclick=vsig;
+$('make1').onclick=make1;$('check1').onclick=check1;$('make2').onclick=make2;
+function tab(n){$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').setAttribute('aria-selected',n===1);$('t2').setAttribute('aria-selected',n===2);}
+$('t1').onclick=()=>tab(1);$('t2').onclick=()=>tab(2);
+if(location.hash==='#demo'){make1().then(()=>{return vsig();});}
+if(location.hash==='#wrong'){make1().then(()=>{$('v_code').value='xxxx';return vsig();});}
+if(location.hash==='#nature'){tab(2);make2();}
+</script>
+</body>
+</html>
