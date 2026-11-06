@@ -81,10 +81,6 @@ pre.rule{margin:0 12px;white-space:pre-wrap;font-size:13px;font-family:"Courier 
 <div class="win"><div class="titlebar"><span>理由カード - ラティ</span></div>
 <div class="wrap">
 
-<div class="tabs" role="tablist">
-  <button class="tab" role="tab" id="t1" aria-selected="true">教室 英語の音読</button>
-  <button class="tab" role="tab" id="t2" aria-selected="false">校外 自然学習(水質)</button>
-</div>
 
 <!-- ===== 音読 ===== -->
 <section id="p1" class="grid">
@@ -131,34 +127,6 @@ pre.rule{margin:0 12px;white-space:pre-wrap;font-size:13px;font-family:"Courier 
   </div>
 </section>
 
-<!-- ===== 自然学習 ===== -->
-<section id="p2" class="grid" hidden>
-  <div>
-    <div class="box c-cobalt">
-      <h2>1 規則(先生が署名した版)</h2>
-      <pre class="rule" id="rule2"></pre>
-      <div class="note" style="margin-top:6px">規則の版: <span class="mono" id="hash2"></span></div>
-    </div>
-    <div class="box c-dark">
-      <h2>2 子どもと先生が入れる</h2>
-      <div class="row2">
-        <div><label for="n_up">上流の透明度(cm)</label><input id="n_up" type="number" min="0" value="48"></div>
-        <div><label for="n_down">下流の透明度(cm)</label><input id="n_down" type="number" min="0" value="31"></div>
-      </div>
-      <div class="row2">
-        <div><label for="n_times">測定の回数</label><input id="n_times" type="number" min="0" value="3"></div>
-        <div><label for="n_claim">子どもが選んだ主張の型</label>
-          <select id="n_claim"><option value="up">上流ほど透明度が高い</option><option value="more">生き物が増えた</option></select></div>
-      </div>
-      <label for="n_note">先生の見方(任意)</label><input id="n_note" value="考察は具体的。雨の翌日の影響に触れていた">
-      <label for="n_ok">承認した先生</label><input id="n_ok" value="先生C">
-      <button class="go" id="make2">理由カードを作る</button>
-    </div>
-  </div>
-  <div>
-    <div class="box c-white"><h2>3 理由カード</h2><div id="card2" class="note">左で「理由カードを作る」を押す</div></div>
-  </div>
-</section>
 </div>
 <div class="status"><span>準備完了</span><span>規則・児童・数値は架空の例</span></div>
 </div>
@@ -167,8 +135,6 @@ pre.rule{margin:0 12px;white-space:pre-wrap;font-size:13px;font-family:"Courier 
 /* ---------- 規則(架空) ---------- */
 const RULE1 = {id:'音読1分', ver:'v3', minWords:60, passMiss:4,
   text:'規則 音読1分 v3\n1 録音がない → 人に戻す\n2 語数が60未満 → 人に戻す\n3 誤読が4以下 → 次の段階\n4 誤読が5以上 → 今の段階(あと「誤読−4」つ減ると次の段階)'};
-const RULE2 = {id:'自然学習 水質', ver:'v1',
-  text:'規則 水質の観察 v1\n1 測定が3回未満 → 人に戻す\n2 主張「上流ほど透明度が高い」→ 上流の値 > 下流の値 なら 合う\n3 主張「生き物が増えた」→ 比べる記録がない → 人に戻す'};
 
 function judge1(i){
   const path=[];
@@ -180,16 +146,6 @@ function judge1(i){
   path.push('誤読 '+i.miss+' > '+RULE1.passMiss);
   return {res:'今の段階',why:'あと誤読を '+(i.miss-RULE1.passMiss)+' 減らすと次の段階',path,need:i.miss-RULE1.passMiss};
 }
-function judge2(i){
-  const path=[];
-  if(i.times<3){path.push('測定 '+i.times+'回 < 3');return {res:'人に戻す',why:'測定が足りない',path};}
-  path.push('測定 '+i.times+'回 ≥ 3');
-  if(i.claim==='more'){path.push('主張「生き物が増えた」');path.push('比べる記録なし');return {res:'人に戻す',why:'この主張は、入っている記録で照合できない',path};}
-  path.push('主張「上流ほど透明度が高い」');
-  if(i.up>i.down){path.push('上流 '+i.up+' > 下流 '+i.down);return {res:'合う',why:'値と主張に食い違いがない',path};}
-  path.push('上流 '+i.up+' ≤ 下流 '+i.down);return {res:'合わない',why:'値と主張が食い違う。先生と確かめる',path};
-}
-
 /* ---------- 署名(簡易: 署名コード + 規則の版 + 内容 をまぜたハッシュ) ---------- */
 const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
 const enc=s=>new TextEncoder().encode(s);
@@ -234,30 +190,9 @@ async function check1(){
   $('verify1').innerHTML='<div class="verdict'+(same?'':' bad')+'">家庭の結果: '+esc(j.res)+'。カードの結果: '+esc(last1.j.res)+'。'+(same?'同じ判断になった。':'食い違う。数の入れ間違いか、規則の違いを確かめる。')+'</div>';
 }
 
-/* ---------- 自然学習 ---------- */
-async function make2(){
-  const i={up:+$('n_up').value,down:+$('n_down').value,times:+$('n_times').value,claim:$('n_claim').value};
-  const j=judge2(i);
-  const hash=await sha(RULE2.text);
-  const sig=await sign('cccc',hash,JSON.stringify({rule:RULE2.id+RULE2.ver,i,j:j.res}));
-  const bad=(j.res==='人に戻す'||j.res==='合わない');
-  let h='<div class="card"><div class="h">児童A(架空) / 探究 / 川の水質調査</div>';
-  h+=row('入れた数','上流 '+i.up+'cm、下流 '+i.down+'cm、'+i.times+'回','人','f');
-  h+=row('主張の型',i.claim==='up'?'上流ほど透明度が高い':'生き物が増えた','選ぶ','p');
-  h+=row('規則と結果','規則'+RULE2.ver+'。<b class="result">'+esc(j.res)+'</b>。'+esc(j.why),'自動','a');
-  h+=row('通った道',esc(j.path.join(' → ')),'自動','a');
-  h+=row('先生の見方',esc($('n_note').value||'(なし)'),'任意','f');
-  h+=row('承認',esc($('n_ok').value)+'  署名 <span class="mono">'+sig+'</span>','署名','s');
-  h+='</div>';
-  h+='<div class="note" style="margin-top:8px">規則の版(ハッシュ) <span class="mono">'+hash.slice(0,16)+'…</span></div>';
-  h+='<div class="note" style="margin-top:8px">照合できるのは、値と主張が合うかまで。測り間違いや、作った値は見抜けない。考察の深さは、先生が読む。</div>';
-  $('card2').className='';$('card2').innerHTML=h;
-}
-
 /* ---------- 画面 ---------- */
-$('rule1').textContent=RULE1.text;$('rule2').textContent=RULE2.text;
+$('rule1').textContent=RULE1.text;
 sha(RULE1.text).then(h=>$('hash1').textContent=h.slice(0,32)+'…').catch(()=>$('hash1').textContent='(計算できない)');
-sha(RULE2.text).then(h=>$('hash2').textContent=h.slice(0,32)+'…').catch(()=>$('hash2').textContent='(計算できない)');
 async function vsig(){
   if(!last1){$('v_out').innerHTML='<div class="verdict bad">先にカードを作る</div>';return;}
   const i=last1.i;
@@ -268,12 +203,9 @@ async function vsig(){
   $('v_out').innerHTML='<div class="verdict'+(ok?'':' bad')+'">作り直した署名 <span class="mono">'+sig+'</span> / カードの署名 <span class="mono">'+last1.sig+'</span><br>'+(ok?'一致した。'+esc(last1.who)+'の教員コードで、この規則と内容に署名したと確かめられた。':'一致しない。内容が書き換えられたか、教員コードが違う。')+'</div>';
 }
 $('vsig').onclick=vsig;
-$('make1').onclick=make1;$('check1').onclick=check1;$('make2').onclick=make2;
-function tab(n){$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').setAttribute('aria-selected',n===1);$('t2').setAttribute('aria-selected',n===2);}
-$('t1').onclick=()=>tab(1);$('t2').onclick=()=>tab(2);
+$('make1').onclick=make1;$('check1').onclick=check1;
 if(location.hash==='#demo'){make1().then(()=>{return vsig();});}
 if(location.hash==='#wrong'){make1().then(()=>{$('v_code').value='xxxx';return vsig();});}
-if(location.hash==='#nature'){tab(2);make2();}
 </script>
 </body>
 </html>
