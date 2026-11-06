@@ -57,6 +57,23 @@ pre.rule{margin:0 12px;white-space:pre-wrap;font-size:13px;font-family:"Courier 
 .status{display:flex;gap:2px;padding:3px 6px;background:#ece9d8;border-top:1px solid #aca899;font-size:12px}
 .status span{padding:2px 10px;border:1px solid;border-color:#aca899 #fff #fff #aca899}
 .status span:last-child{flex:1}
+.grid>div,.box,.card,.card .r>span{min-width:0}
+.mono,pre.rule,.card .r>span{overflow-wrap:anywhere}
+@media (max-width:640px){
+  body{padding:0}
+  .win{border-radius:0;border-width:0 0 3px 0;box-shadow:none}
+  .titlebar{border-radius:0}
+  .wrap{padding:8px 6px 10px}
+  .tabs{padding-left:0}
+  .tab{flex:1;padding:6px 6px 5px;font-size:13px;text-align:center}
+  .grid{padding:8px}
+  .row2{grid-template-columns:1fr}
+  .card .r{grid-template-columns:70px 1fr 48px;gap:6px;padding:5px 7px;font-size:13px}
+  .card .k{font-size:12px}
+  input,select{font-size:16px;padding:6px 6px}
+  button.go,button.sub{width:calc(100% - 24px);padding:9px 12px}
+  pre.rule{font-size:12px}
+}
 [hidden]{display:none!important}
 </style>
 </head>
